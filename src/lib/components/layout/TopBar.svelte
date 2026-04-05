@@ -396,7 +396,7 @@
             </Button>
 
             {#if downloadsOpen}
-                <div class="fixed inset-0 z-40" onclick={() => downloadsOpen = false}></div>
+                <button type="button" class="fixed inset-0 z-40 bg-transparent border-0 w-full h-full cursor-default" aria-label="Close downloads menu" onclick={() => downloadsOpen = false}></button>
                 <div class="absolute top-full right-0 mt-2 w-80 bg-background border rounded-lg shadow-lg z-50 overflow-hidden flex flex-col">
                     <div class="p-3 border-b font-medium text-sm flex justify-between items-center bg-muted/10">
                         <span>Downloads</span>
