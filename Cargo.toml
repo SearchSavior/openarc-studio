@@ -1,0 +1,6 @@
+[workspace]
+members = [
+    "src-tauri",
+    "openarc-rs"
+]
+resolver = "2"

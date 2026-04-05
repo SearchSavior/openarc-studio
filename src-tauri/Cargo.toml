@@ -1,0 +1,23 @@
+[package]
+name = "openarc-studio"
+version = "0.1.0"
+description = "OpenArc Studio is a desktop application that provides a GUI for managing an OpenArc instance."
+authors = ["MrElmida"]
+edition = "2024"
+
+[lib]
+crate-type = ["cdylib", "rlib", "staticlib"]
+name = "openarc_studio_lib"
+
+[dependencies]
+async-openai = { version = "0.34.0", features = ["chat-completion"] }
+futures-util = "0.3.32"
+openarc-rs = { path = "../openarc-rs" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tokio = { version = "1", features = ["sync"] }
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }

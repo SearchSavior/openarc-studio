@@ -1,0 +1,3 @@
+[submodule "openarc-rs"]
+	path = openarc-rs
+	url = https://github.com/SearchSavior/openarc-rs
