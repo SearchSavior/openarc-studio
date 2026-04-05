@@ -1,3 +1,4 @@
+import { untrack } from "svelte";
 import { invoke } from "@tauri-apps/api/core";
 
 export type AppSettings = {
@@ -30,16 +31,18 @@ export const appState = $state({
   logs: [] as LogEntry[],
 
   addLog(level: LogLevel, message: string, details?: string) {
-    this.logs.unshift({
-      id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
-      timestamp: new Date(),
-      level,
-      message,
-      details,
+    untrack(() => {
+      this.logs.unshift({
+        id: Date.now().toString() + Math.random().toString(36).substring(2, 9),
+        timestamp: new Date(),
+        level,
+        message,
+        details,
+      });
+      if (this.logs.length > 2000) {
+        this.logs.pop();
+      }
     });
-    if (this.logs.length > 2000) {
-      this.logs.pop();
-    }
   },
 
   clearLogs() {

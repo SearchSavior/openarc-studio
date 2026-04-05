@@ -126,13 +126,16 @@
 
     const initiateLoad = (model: any) => {
         appState.addLog('v2', `Initiating load for model: ${model.name}`);
-        if (!model.hasConfig || model.type === "UNKNOWN") {
-            selectedModelForConfig = model;
-            configModalOpen = true;
-            return;
-        }
-        selectedModelForLoad = model;
-        deviceModalOpen = true;
+        dialogOpen = false; // Close the model selector dialog
+        setTimeout(() => {
+            if (!model.hasConfig || model.type === "UNKNOWN") {
+                selectedModelForConfig = model;
+                configModalOpen = true;
+                return;
+            }
+            selectedModelForLoad = model;
+            deviceModalOpen = true;
+        }, 10);
     };
     
     const selectLoadedModel = (model: any) => {

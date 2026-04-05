@@ -59,7 +59,9 @@
                 `Successfully updated config for ${modelName}`,
             );
             open = false;
-            onSuccess(config);
+            setTimeout(() => {
+                onSuccess(config);
+            }, 10);
         } catch (e: any) {
             console.error("Failed to save config", e);
             appState.addLog(
