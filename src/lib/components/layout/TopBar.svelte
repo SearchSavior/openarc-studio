@@ -60,46 +60,31 @@
         });
     });
 
-    let activeModels = $state<{ llm: any; stt: any; tts: any }>({ llm: null, stt: null, tts: null });
+    let activeModels = $state<{ llm: string | null; stt: string | null; tts: string | null }>({ llm: null, stt: null, tts: null });
+
+    const activeLlm = $derived(loadedModels.find((m: any) => m.name === activeModels.llm) || null);
+    const activeStt = $derived(loadedModels.find((m: any) => m.name === activeModels.stt) || null);
+    const activeTts = $derived(loadedModels.find((m: any) => m.name === activeModels.tts) || null);
 
     $effect(() => {
-        if (activeModels.llm) {
-            const match = loadedModels.find((m: any) => m.name === activeModels.llm.name && (m.status === "loaded" || m.status === "loading"));
-            if (match) {
-                activeModels.llm = match;
-            } else {
-                activeModels.llm = null;
-            }
-        }
-        if (activeModels.stt) {
-            const match = loadedModels.find((m: any) => m.name === activeModels.stt.name && (m.status === "loaded" || m.status === "loading"));
-            if (match) {
-                activeModels.stt = match;
-            } else {
-                activeModels.stt = null;
-            }
-        }
-        if (activeModels.tts) {
-            const match = loadedModels.find((m: any) => m.name === activeModels.tts.name && (m.status === "loaded" || m.status === "loading"));
-            if (match) {
-                activeModels.tts = match;
-            } else {
-                activeModels.tts = null;
-            }
-        }
-        
-        if (!activeModels.llm) {
+        // Fallback to auto-select if nothing is manually selected or if the selected model was unloaded
+        if (!activeLlm && !activeModels.llm) {
             const llm = loadedModels.find((m: any) => ["LLM", "VLM"].includes((m.type || "").toUpperCase()) && (m.status === "loaded" || m.status === "loading"));
-            if (llm) activeModels.llm = llm;
+            if (llm) activeModels.llm = llm.name;
         }
-        if (!activeModels.stt) {
+        if (!activeStt && !activeModels.stt) {
             const stt = loadedModels.find((m: any) => ["STT", "WHISPER"].includes((m.type || "").toUpperCase()) && (m.status === "loaded" || m.status === "loading"));
-            if (stt) activeModels.stt = stt;
+            if (stt) activeModels.stt = stt.name;
         }
-        if (!activeModels.tts) {
+        if (!activeTts && !activeModels.tts) {
             const tts = loadedModels.find((m: any) => ["TTS", "KOKORO"].includes((m.type || "").toUpperCase()) && (m.status === "loaded" || m.status === "loading"));
-            if (tts) activeModels.tts = tts;
+            if (tts) activeModels.tts = tts.name;
         }
+
+        // Clean up stale selections
+        if (activeModels.llm && !loadedModels.find((m: any) => m.name === activeModels.llm)) activeModels.llm = null;
+        if (activeModels.stt && !loadedModels.find((m: any) => m.name === activeModels.stt)) activeModels.stt = null;
+        if (activeModels.tts && !loadedModels.find((m: any) => m.name === activeModels.tts)) activeModels.tts = null;
     });
 
     const handleLoad = async (model: any, device: string = "AUTO") => {
@@ -157,11 +142,11 @@
         if (model.status === 'loaded') {
             const arch = (model.type || "LLM").toUpperCase();
             if (["STT", "WHISPER"].includes(arch)) {
-                activeModels.stt = model;
+                activeModels.stt = model.name;
             } else if (["TTS", "KOKORO"].includes(arch)) {
-                activeModels.tts = model;
+                activeModels.tts = model.name;
             } else {
-                activeModels.llm = model;
+                activeModels.llm = model.name;
             }
         }
     };
@@ -208,17 +193,17 @@
                                 <div class="flex flex-col items-start overflow-hidden">
                                     <span class="text-[10px] font-bold tracking-wider uppercase text-muted-foreground leading-none mb-0.5">Active Models</span>
                                     <span class="font-semibold text-[13px] truncate max-w-[440px] leading-tight flex items-center gap-2">
-                                        {#if activeModels.llm || activeModels.stt || activeModels.tts}
+                                        {#if activeLlm || activeStt || activeTts}
                                             {[
-                                                activeModels.llm?.name, 
-                                                activeModels.stt?.name, 
-                                                activeModels.tts?.name
+                                                activeLlm?.name, 
+                                                activeStt?.name, 
+                                                activeTts?.name
                                             ].filter(Boolean).join(" • ")}
                                         {:else}
                                             No Models Active
                                         {/if}
                                         
-                                        {#if activeModels.llm?.status === 'loading' || activeModels.stt?.status === 'loading' || activeModels.tts?.status === 'loading'}
+                                        {#if activeLlm?.status === 'loading' || activeStt?.status === 'loading' || activeTts?.status === 'loading'}
                                             <span class="inline-flex items-center gap-1.5 px-1.5 py-0.5 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-500 text-[10px] font-bold uppercase tracking-wider animate-pulse">
                                                 <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
                                                 Loading
@@ -288,7 +273,7 @@
                                 </tr>
                                 {#each loadedModels as model}
                                     <tr 
-                                        class="group border-b border-white/5 last:border-0 hover:bg-muted/30 transition-all cursor-pointer {(activeModels.llm?.name === model.name || activeModels.stt?.name === model.name || activeModels.tts?.name === model.name) ? 'bg-primary/5 hover:bg-primary/10' : ''}"
+                                        class="group border-b border-white/5 last:border-0 hover:bg-muted/30 transition-all cursor-pointer {(activeLlm?.name === model.name || activeStt?.name === model.name || activeTts?.name === model.name) ? 'bg-primary/5 hover:bg-primary/10' : ''}"
                                         onclick={() => selectLoadedModel(model)}
                                     >
                                         <td class="py-1.5 px-3 overflow-hidden">
@@ -302,7 +287,7 @@
                                                         </span>
                                                         Loading
                                                     </span>
-                                                {:else if activeModels.llm?.name === model.name || activeModels.stt?.name === model.name || activeModels.tts?.name === model.name}
+                                                {:else if activeLlm?.name === model.name || activeStt?.name === model.name || activeTts?.name === model.name}
                                                     <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-sm bg-primary/10 border border-primary/20 text-primary text-[9px] font-bold uppercase tracking-wider shadow-[0_0_10px_rgba(var(--primary),0.1)] shrink-0">
                                                         <CheckCircle2 class="w-2.5 h-2.5 text-primary shrink-0" />
                                                         Active
