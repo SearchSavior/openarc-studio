@@ -63,14 +63,29 @@
     let activeModels = $state<{ llm: any; stt: any; tts: any }>({ llm: null, stt: null, tts: null });
 
     $effect(() => {
-        if (activeModels.llm && !loadedModels.find((m: any) => m.name === activeModels.llm.name && (m.status === "loaded" || m.status === "loading"))) {
-            activeModels.llm = null;
+        if (activeModels.llm) {
+            const match = loadedModels.find((m: any) => m.name === activeModels.llm.name && (m.status === "loaded" || m.status === "loading"));
+            if (match) {
+                activeModels.llm = match;
+            } else {
+                activeModels.llm = null;
+            }
         }
-        if (activeModels.stt && !loadedModels.find((m: any) => m.name === activeModels.stt.name && (m.status === "loaded" || m.status === "loading"))) {
-            activeModels.stt = null;
+        if (activeModels.stt) {
+            const match = loadedModels.find((m: any) => m.name === activeModels.stt.name && (m.status === "loaded" || m.status === "loading"));
+            if (match) {
+                activeModels.stt = match;
+            } else {
+                activeModels.stt = null;
+            }
         }
-        if (activeModels.tts && !loadedModels.find((m: any) => m.name === activeModels.tts.name && (m.status === "loaded" || m.status === "loading"))) {
-            activeModels.tts = null;
+        if (activeModels.tts) {
+            const match = loadedModels.find((m: any) => m.name === activeModels.tts.name && (m.status === "loaded" || m.status === "loading"));
+            if (match) {
+                activeModels.tts = match;
+            } else {
+                activeModels.tts = null;
+            }
         }
         
         if (!activeModels.llm) {
