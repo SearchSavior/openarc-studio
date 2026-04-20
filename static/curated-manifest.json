@@ -1,0 +1,627 @@
+{
+  "version": 1,
+  "name": "OpenArc Curated Models",
+  "description": "Curated and pre-configured OpenVINO models for OpenArc Studio. Each model includes a preset configuration so it loads correctly without manual tuning.",
+  "lastUpdated": "2025-07-25",
+  "categories": [
+    {
+      "id": "llm",
+      "label": "LLMs",
+      "description": "Text Generation Models",
+      "icon": "MessageSquare"
+    },
+    {
+      "id": "vlm",
+      "label": "VLMs",
+      "description": "Vision-Language Models",
+      "icon": "Eye"
+    },
+    {
+      "id": "stt",
+      "label": "ASR",
+      "description": "Automatic Speech Recognition",
+      "icon": "Mic"
+    },
+    {
+      "id": "tts",
+      "label": "TTS",
+      "description": "Text-to-Speech",
+      "icon": "Volume2"
+    },
+    {
+      "id": "emb",
+      "label": "Embedding",
+      "description": "Text Embedding Models",
+      "icon": "Binary"
+    },
+    {
+      "id": "rerank",
+      "label": "Rerank",
+      "description": "Reranker Models",
+      "icon": "ArrowUpDown"
+    }
+  ],
+  "models": [
+    {
+      "id": "Echo9Zulu/Qwen3-1.7B-int8_asym-ov",
+      "name": "Qwen3 1.7B (INT8)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Lightweight Qwen3 model ideal for basic text generation on CPU or integrated GPU.",
+      "params": "1.7B",
+      "quantization": "INT8",
+      "tags": ["qwen3", "int8", "text-generation", "small"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen3-4B-Instruct-2507-int4_asym-awq-ov",
+      "name": "Qwen3 4B Instruct 2507 (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Instruct-tuned Qwen3 4B model. Good balance of quality and speed for constrained hardware.",
+      "params": "4B",
+      "quantization": "INT4",
+      "tags": ["qwen3", "int4", "instruct", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Gapeleon/Satyr-V0.1-4B-HF-int4_awq-ov",
+      "name": "Satyr V0.1 4B (INT4)",
+      "author": "Gapeleon",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Satyr creative writing model, 4B parameters with AWQ INT4 quantization.",
+      "params": "4B",
+      "quantization": "INT4",
+      "tags": ["satyr", "int4", "creative-writing", "mistral"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Dolphin-X1-8B-int4_asym-awq-ov",
+      "name": "Dolphin X1 8B (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Dolphin X1 uncensored instruct model, 8B parameters with AWQ INT4 quantization.",
+      "params": "8B",
+      "quantization": "INT4",
+      "tags": ["dolphin", "int4", "instruct", "llama"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen3-8B-ShiningValiant3-int4-asym-ov",
+      "name": "Qwen3 8B ShiningValiant3 (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Qwen3 8B fine-tuned with ShiningValiant3, INT4 asymmetric quantization.",
+      "params": "8B",
+      "quantization": "INT4",
+      "tags": ["qwen3", "int4", "instruct", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen3-14B-int4_sym-ov",
+      "name": "Qwen3 14B (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Full Qwen3 14B base model with symmetric INT4 quantization. Requires GPU for comfortable inference.",
+      "params": "14B",
+      "quantization": "INT4",
+      "tags": ["qwen3", "int4", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Cydonia-24B-v4.2.0-int4_asym-awq-ov",
+      "name": "Cydonia 24B v4.2 (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Cydonia 24B Mistral-based model v4.2.0, AWQ INT4 quantization. Best with dedicated GPU.",
+      "params": "24B",
+      "quantization": "INT4",
+      "tags": ["cydonia", "int4", "mistral", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen2.5-Microsoft-NextCoder-Soar-Instruct-FUSED-CODER-Fast-11B-int4_asym-awq-ov",
+      "name": "NextCoder Soar 11B FUSED CODER (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Qwen2.5 + Microsoft NextCoder fused coding model, 11B parameters. Optimized for code generation.",
+      "params": "11B",
+      "quantization": "INT4",
+      "tags": ["qwen2.5", "int4", "code", "instruct"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Magistral-Small-2509-Text-Only-int4_asym-awq-ov",
+      "name": "Magistral Small 2509 Text-Only (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Mistral Small 2509 text-only variant, AWQ INT4. Efficient mid-size model.",
+      "params": "25B",
+      "quantization": "INT4",
+      "tags": ["mistral", "int4", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Hermes-4-70B-int4_asym-awq-ov",
+      "name": "Hermes 4 70B (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Hermes 4 massive 70B model, AWQ INT4 quantization. Requires high-VRAM GPU (24GB+).",
+      "params": "70B",
+      "quantization": "INT4",
+      "tags": ["hermes", "int4", "llama", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen2.5-Coder-32B-Instruct-int4_sym-awq-ov",
+      "name": "Qwen2.5 Coder 32B Instruct (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Qwen2.5 Coder 32B instruct-tuned, symmetric AWQ INT4. Top-tier code model.",
+      "params": "32B",
+      "quantization": "INT4",
+      "tags": ["qwen2.5", "int4", "code", "instruct"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen3-32B-Instruct-int4_sym-awq-ov",
+      "name": "Qwen3 32B Instruct (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Qwen3 32B instruct model, symmetric AWQ INT4. High-quality general-purpose LLM.",
+      "params": "32B",
+      "quantization": "INT4",
+      "tags": ["qwen3", "int4", "instruct", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "DudePls/Big-Tiger-Gemma-27B-v3-int4-asym-ov",
+      "name": "Big Tiger Gemma 27B v3 (INT4)",
+      "author": "DudePls",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Big Tiger Gemma 27B v3, asymmetric INT4 quantization.",
+      "params": "27B",
+      "quantization": "INT4",
+      "tags": ["gemma", "int4", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "DudePls/Nanbeige4.1-3B-openvino",
+      "name": "Nanbeige 4.1 3B (FP16)",
+      "author": "DudePls",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Nanbeige 4.1 3B model, FP16 precision. Compact and fast.",
+      "params": "3B",
+      "quantization": "FP16",
+      "tags": ["nanbeige", "fp16", "text-generation", "small"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "DudePls/Cydonia-24B-v4.3-OpenVINO-INT4",
+      "name": "Cydonia 24B v4.3 (INT4)",
+      "author": "DudePls",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Cydonia 24B v4.3, INT4 quantization. Latest Cydonia release.",
+      "params": "24B",
+      "quantization": "INT4",
+      "tags": ["cydonia", "int4", "mistral", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Nemotron-Cascade-14B-Thinking-int4_asym-se-ov",
+      "name": "Nemotron Cascade 14B Thinking (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "Nemotron Cascade 14B thinking model, INT4 asymmetric SE quantization.",
+      "params": "14B",
+      "quantization": "INT4",
+      "tags": ["nemotron", "int4", "thinking", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/NousCoder-14B-int4_sym-ov",
+      "name": "NousCoder 14B (INT4)",
+      "author": "Echo9Zulu",
+      "category": "llm",
+      "subcategory": null,
+      "description": "NousCoder 14B code-focused model, symmetric INT4 quantization.",
+      "params": "14B",
+      "quantization": "INT4",
+      "tags": ["nouscoder", "int4", "code", "text-generation"],
+      "preset": {
+        "model_type": "llm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+
+    {
+      "id": "Echo9Zulu/gemma-3-4b-it-int8_asym-ov",
+      "name": "Gemma 3 4B IT (INT8)",
+      "author": "Echo9Zulu",
+      "category": "vlm",
+      "subcategory": null,
+      "description": "Gemma 3 4B instruct-tuned vision-language model, INT8 quantization. Great for image understanding on modest hardware.",
+      "params": "4B",
+      "quantization": "INT8",
+      "tags": ["gemma3", "int8", "vlm", "vision", "instruct"],
+      "preset": {
+        "model_type": "vlm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": "gemma3",
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Gemma-3-12b-it-qat-int4_asym-ov",
+      "name": "Gemma 3 12B IT (INT4)",
+      "author": "Echo9Zulu",
+      "category": "vlm",
+      "subcategory": null,
+      "description": "Gemma 3 12B instruct-tuned VLM with QAT INT4 quantization. Higher quality vision-language model.",
+      "params": "12B",
+      "quantization": "INT4",
+      "tags": ["gemma3", "int4", "vlm", "vision", "instruct"],
+      "preset": {
+        "model_type": "vlm",
+        "engine": "ovgenai",
+        "device": "GPU",
+        "vlm_type": "gemma3",
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen2.5-VL-7B-Instruct-int4_sym-ov",
+      "name": "Qwen2.5 VL 7B Instruct (INT4)",
+      "author": "Echo9Zulu",
+      "category": "vlm",
+      "subcategory": null,
+      "description": "Qwen2.5-VL 7B instruct-tuned vision-language model, symmetric INT4 quantization.",
+      "params": "7B",
+      "quantization": "INT4",
+      "tags": ["qwen2.5", "int4", "vlm", "vision", "instruct"],
+      "preset": {
+        "model_type": "vlm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": "qwen25vl",
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Nanonets-OCR2-3B-LM-INT4_ASYM-VE-FP16-ov",
+      "name": "Nanonets OCR2 3B (INT4)",
+      "author": "Echo9Zulu",
+      "category": "vlm",
+      "subcategory": null,
+      "description": "Nanonets OCR2 3B optical character recognition model based on Qwen2.5-VL architecture, INT4 asymmetric quantization with FP16 vision encoder.",
+      "params": "3B",
+      "quantization": "INT4",
+      "tags": ["ocr", "int4", "vlm", "vision", "qwen2.5"],
+      "preset": {
+        "model_type": "vlm",
+        "engine": "ovgenai",
+        "device": "AUTO",
+        "vlm_type": "qwen25vl",
+        "runtime_config": {}
+      }
+    },
+
+    {
+      "id": "OpenVINO/distil-whisper-large-v3-int8-ov",
+      "name": "Distil Whisper Large v3 (INT8)",
+      "author": "OpenVINO",
+      "category": "stt",
+      "subcategory": "Whisper",
+      "description": "Distilled Whisper Large v3 speech-to-text model, INT8 quantization. Fast and accurate transcription.",
+      "params": "1.5B",
+      "quantization": "INT8",
+      "tags": ["whisper", "int8", "asr", "speech-to-text"],
+      "preset": {
+        "model_type": "whisper",
+        "engine": "optimum",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "OpenVINO/distil-whisper-large-v3-fp16-ov",
+      "name": "Distil Whisper Large v3 (FP16)",
+      "author": "OpenVINO",
+      "category": "stt",
+      "subcategory": "Whisper",
+      "description": "Distilled Whisper Large v3 speech-to-text model, FP16 precision. Maximum accuracy.",
+      "params": "1.5B",
+      "quantization": "FP16",
+      "tags": ["whisper", "fp16", "asr", "speech-to-text"],
+      "preset": {
+        "model_type": "whisper",
+        "engine": "optimum",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "OpenVINO/whisper-large-v3-int8-ov",
+      "name": "Whisper Large v3 (INT8)",
+      "author": "OpenVINO",
+      "category": "stt",
+      "subcategory": "Whisper",
+      "description": "Full Whisper Large v3 speech-to-text model, INT8 quantization. Best accuracy for Whisper.",
+      "params": "1.5B",
+      "quantization": "INT8",
+      "tags": ["whisper", "int8", "asr", "speech-to-text"],
+      "preset": {
+        "model_type": "whisper",
+        "engine": "optimum",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "OpenVINO/openai-whisper-large-v3-fp16-ov",
+      "name": "OpenAI Whisper Large v3 (FP16)",
+      "author": "OpenVINO",
+      "category": "stt",
+      "subcategory": "Whisper",
+      "description": "OpenAI Whisper Large v3 FP16, highest fidelity transcription model.",
+      "params": "1.5B",
+      "quantization": "FP16",
+      "tags": ["whisper", "fp16", "asr", "speech-to-text"],
+      "preset": {
+        "model_type": "whisper",
+        "engine": "optimum",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen3-ASR-0.6B-INT8_ASYM-OpenVINO",
+      "name": "Qwen3 ASR 0.6B (INT8)",
+      "author": "Echo9Zulu",
+      "category": "stt",
+      "subcategory": "Qwen3-ASR",
+      "description": "Qwen3 ASR speech-to-text model, 0.6B parameters with INT8 asymmetric quantization. Ultra-lightweight ASR.",
+      "params": "0.6B",
+      "quantization": "INT8",
+      "tags": ["qwen3", "int8", "asr", "speech-to-text"],
+      "preset": {
+        "model_type": "qwen3_asr",
+        "engine": "optimum",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+
+    {
+      "id": "Echo9Zulu/Kokoro-82M-FP16-OpenVINO",
+      "name": "Kokoro 82M (FP16)",
+      "author": "Echo9Zulu",
+      "category": "tts",
+      "subcategory": "Kokoro",
+      "description": "Kokoro TTS 82M text-to-speech model, FP16 precision. High-quality voice synthesis.",
+      "params": "82M",
+      "quantization": "FP16",
+      "tags": ["kokoro", "fp16", "tts", "text-to-speech"],
+      "preset": {
+        "model_type": "kokoro",
+        "engine": "openvino",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen3-TTS-12Hz-CustomVoice-1.7B-INT8-OpenVINO",
+      "name": "Qwen3-TTS Custom Voice 1.7B (INT8)",
+      "author": "Echo9Zulu",
+      "category": "tts",
+      "subcategory": "Qwen3-TTS",
+      "description": "Qwen3-TTS with preset speaker voice, 1.7B parameters INT8. Use for generating speech with predefined voice profiles.",
+      "params": "1.7B",
+      "quantization": "INT8",
+      "tags": ["qwen3", "int8", "tts", "text-to-speech", "custom-voice"],
+      "preset": {
+        "model_type": "qwen3_tts_custom_voice",
+        "engine": "openvino",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen3-TTS-12Hz-VoiceDesign-1.7B-INT8-OpenVINO",
+      "name": "Qwen3-TTS Voice Design 1.7B (INT8)",
+      "author": "Echo9Zulu",
+      "category": "tts",
+      "subcategory": "Qwen3-TTS",
+      "description": "Qwen3-TTS with free-form voice design, 1.7B parameters INT8. Describe any voice characteristic and generate it.",
+      "params": "1.7B",
+      "quantization": "INT8",
+      "tags": ["qwen3", "int8", "tts", "text-to-speech", "voice-design"],
+      "preset": {
+        "model_type": "qwen3_tts_voice_design",
+        "engine": "openvino",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+    {
+      "id": "Echo9Zulu/Qwen3-TTS-12Hz-Base-1.7B-INT8-OpenVINO",
+      "name": "Qwen3-TTS Base (Voice Clone) 1.7B (INT8)",
+      "author": "Echo9Zulu",
+      "category": "tts",
+      "subcategory": "Qwen3-TTS",
+      "description": "Qwen3-TTS base model for voice cloning, 1.7B parameters INT8. Clone a voice from a reference audio sample.",
+      "params": "1.7B",
+      "quantization": "INT8",
+      "tags": ["qwen3", "int8", "tts", "text-to-speech", "voice-clone"],
+      "preset": {
+        "model_type": "qwen3_tts_voice_clone",
+        "engine": "openvino",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+
+    {
+      "id": "Echo9Zulu/Qwen3-Embedding-0.6B-int8_asym-ov",
+      "name": "Qwen3 Embedding 0.6B (INT8)",
+      "author": "Echo9Zulu",
+      "category": "emb",
+      "subcategory": null,
+      "description": "Qwen3 text embedding model, 0.6B parameters INT8 asymmetric. Generates dense vector representations.",
+      "params": "0.6B",
+      "quantization": "INT8",
+      "tags": ["qwen3", "int8", "embedding"],
+      "preset": {
+        "model_type": "emb",
+        "engine": "optimum",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    },
+
+    {
+      "id": "OpenVINO/Qwen3-Reranker-0.6B-fp16-ov",
+      "name": "Qwen3 Reranker 0.6B (FP16)",
+      "author": "OpenVINO",
+      "category": "rerank",
+      "subcategory": null,
+      "description": "Qwen3 reranker model, 0.6B parameters FP16. Rerank search results for improved relevance.",
+      "params": "0.6B",
+      "quantization": "FP16",
+      "tags": ["qwen3", "fp16", "rerank"],
+      "preset": {
+        "model_type": "rerank",
+        "engine": "optimum",
+        "device": "AUTO",
+        "vlm_type": null,
+        "runtime_config": {}
+      }
+    }
+  ]
+}

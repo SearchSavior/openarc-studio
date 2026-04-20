@@ -1,8 +1,8 @@
 <script lang="ts">
     import { onMount, onDestroy } from 'svelte';
     import { invoke } from '@tauri-apps/api/core';
-    import { Play, Loader2, Server, Box, Zap, Clock, Activity, AlertCircle, Plus, Trash2, CheckCircle2, XCircle, ArrowRight, Download, Eye, ChevronsUpDown, Check } from '@lucide/svelte';
-    
+    import { Play, Loader2, Server, Box, Zap, Clock, Activity, AlertCircle, Plus, Trash2, CheckCircle2, XCircle, ArrowRight, Download, Eye, ChevronsUpDown, Check, Gauge, History, Sliders, Layers, FlaskConical, BarChart3 } from '@lucide/svelte';
+
     import * as Card from '$lib/components/ui/card';
     import { Button } from '$lib/components/ui/button';
     import { Label } from '$lib/components/ui/label';
@@ -17,6 +17,7 @@
     import { appState } from '$lib/state.svelte.js';
     import { openarc } from '$lib/client.svelte.js';
     import { cn } from '$lib/utils.js';
+    import { getArchAccent, getArchColor, resolveModelType, detectModelType } from '$lib/model-types';
 
     import { Input } from '$lib/components/ui/input';
 
@@ -25,13 +26,13 @@
     let temperature = $state([0.7]);
     let topP = $state([0.9]);
     let iterations = $state([1]);
-    
+
     let isRunningQueue = $state(false);
     let queueIndex = $state(0);
-    
+
     let selectedHistoryItem = $state<HistoryItem | null>(null);
     let isHistoryDialogOpen = $state(false);
-    
+
     let loadedModels = $derived((openarc.status?.models || []).filter((m: any) => m.model_type === 'llm' || m.model_type === 'vlm'));
     let localModels = $derived((openarc.localModels?.models || []).filter((m: any) => m.model_type === 'LLM' || m.model_type === 'VLM'));
     let serverVersion = $derived(openarc.version?.version || "Unknown");
@@ -58,7 +59,7 @@
     };
 
     let queue = $state<QueueItem[]>([]);
-    
+
     type HistoryItem = {
         id: string;
         modelName: string;
@@ -68,7 +69,7 @@
         date: Date;
         runs: RunMetric[];
     };
-    
+
     let history = $state<HistoryItem[]>([]);
 
     let selectedLocalModelPath = $state("");
@@ -78,11 +79,11 @@
     let customDevice = $state("");
     let isHeteroDialogOpen = $state(false);
     let heteroSelectedDevices = $state<string[]>([]);
-    
+
     let modelComboboxOpen = $state(false);
-    
+
     let heteroDeviceString = $derived(
-        heteroSelectedDevices.length > 0 
+        heteroSelectedDevices.length > 0
             ? `HETERO:${heteroSelectedDevices.join(',')}`
             : "HETERO:CPU"
     );
@@ -110,6 +111,15 @@
         devices.push({ value: "CUSTOM", label: "CUSTOM" });
         return devices;
     });
+
+    function getQueueItemAccent(item: QueueItem) {
+        return getArchAccent(item.modelType);
+    }
+
+    function getHistoryAccent(item: HistoryItem) {
+        const inferred = resolveModelType(detectModelType(item.modelName)) ?? resolveModelType('llm')!;
+        return getArchAccent(inferred.label);
+    }
 
     onMount(async () => {
         try {
@@ -148,14 +158,14 @@
     function addToQueue() {
         const model = localModels.find((m: any) => m.path === selectedLocalModelPath);
         if (!model) return;
-        
+
         let finalDevice = addDeviceMode;
         if (addDeviceMode === "CUSTOM") {
             finalDevice = customDevice;
         } else if (addDeviceMode === "HETERO") {
             finalDevice = heteroDeviceString;
         }
-        
+
         queue.push({
             id: Date.now().toString() + Math.random().toString(36).substr(2, 9),
             modelPath: model.path,
@@ -197,7 +207,7 @@
             h.runs.length
         ]);
         const csvContent = [headers.join(','), ...rows.map(r => r.join(','))].join('\n');
-        
+
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -212,10 +222,10 @@
 
     async function runQueue() {
         if (queue.length === 0 || isRunningQueue) return;
-        
+
         appState.addLog('v1', `Starting benchmark queue with ${queue.length} items`);
         isRunningQueue = true;
-        
+
         queue.forEach(item => {
             if (item.status === 'error' || item.status === 'completed') {
                 item.status = 'idle';
@@ -223,13 +233,13 @@
                 item.error = undefined;
             }
         });
-        
+
         for (let i = 0; i < queue.length; i++) {
             queueIndex = i;
             let item = queue[i];
             appState.addLog('v2', `Processing queue item ${i + 1}/${queue.length}: ${item.modelName}`);
             item.status = 'loading';
-            
+
             try {
                 // load model if need
                 if (item.loadBefore) {
@@ -253,7 +263,7 @@
                     } else {
                         appState.addLog('v3', `Queue: Model ${item.modelName} already loaded, skipping load step.`);
                     }
-                    
+
                     let isLoaded = false;
                     for (let pollCount = 0; pollCount < 300; pollCount++) { // max 5 min
                         await openarc.refreshStatus();
@@ -269,7 +279,7 @@
                         }
                         await new Promise(r => setTimeout(r, 1000));
                     }
-                    
+
                     if (!isLoaded) {
                         throw new Error("Timeout waiting for model to load (5 minutes)");
                     }
@@ -280,9 +290,9 @@
                 const currentPromptTokens = Math.pow(2, promptPower[0]);
                 const currentMaxTokens = Math.pow(2, maxPower[0]);
                 const numIterations = iterations[0];
-                
+
                 appState.addLog('v2', `Starting benchmark for ${item.modelName}`, `Prompt: ${currentPromptTokens}, Max: ${currentMaxTokens}, Iterations: ${numIterations}`);
-                
+
                 const input_ids = Array.from({ length: currentPromptTokens }, (_, idx) => idx + 1);
                 const benchReq = {
                     model: item.modelName,
@@ -293,7 +303,7 @@
                     top_k: 50,
                     repetition_penalty: 1.1
                 };
-                
+
                 let runs: RunMetric[] = [];
                 let total_pp = 0;
                 let total_tg = 0;
@@ -302,11 +312,11 @@
                 for (let iter = 0; iter < numIterations; iter++) {
                     appState.addLog('v3', `Running iteration ${iter + 1}/${numIterations} for ${item.modelName}...`);
                     const res: any = await invoke("benchmark_model", { req: benchReq });
-                    
+
                     const tg = res.metrics.decode_throughput || 0;
                     const pp = res.metrics.prefill_throughput || 0;
                     const time_taken = res.metrics.decode_duration || 0;
-                    
+
                     runs.push({ pp, tg, time: time_taken });
                     total_pp += pp;
                     total_tg += tg;
@@ -316,16 +326,16 @@
                 const avg_pp = total_pp / numIterations;
                 const avg_tg = total_tg / numIterations;
                 const avg_time = total_time / numIterations;
-                
+
                 appState.addLog('info', `Benchmark completed for ${item.modelName}`, `Avg PP: ${avg_pp.toFixed(2)}, Avg TG: ${avg_tg.toFixed(2)}`);
-                
+
                 item.result = {
                     avg_pp,
                     avg_tg,
                     avg_time,
                     runs
                 };
-                
+
                 history = [{
                     id: Date.now().toString(),
                     modelName: item.modelName,
@@ -356,7 +366,7 @@
                         appState.addLog('error', `Failed to invoke unload_model for ${item.modelName}`, err.toString());
                         console.error(`Failed to invoke unload_model for ${item.modelName}:`, err);
                     }
-                    
+
                     let isUnloaded = false;
                     for (let pollCount = 0; pollCount < 60; pollCount++) { // 60 secs max
                         await openarc.refreshStatus();
@@ -372,12 +382,12 @@
                         appState.addLog('warn', `Timeout waiting for model ${item.modelName} to unload`);
                         console.error(`Timeout waiting for model ${item.modelName} to unload`);
                     }
-                    
+
                     item.status = currentStatus;
                 }
             }
         }
-        
+
         appState.addLog('v1', 'Benchmark queue finished');
         isRunningQueue = false;
         queueIndex = -1;
@@ -386,173 +396,297 @@
 
 <div class="flex h-full w-full overflow-hidden bg-background">
     {#if appState.leftPanelOpen}
-    <aside class="w-[450px] shrink-0 border-r bg-muted/20 flex flex-col h-full transition-all duration-200">
-        <div class="p-4 border-b font-bold text-lg flex items-center gap-2">
-            <Activity class="w-5 h-5" /> Benchmark
+    <aside class="w-[450px] shrink-0 border-r bg-muted/10 flex flex-col h-full overflow-hidden transition-all duration-200">
+        <div class="shrink-0 px-4 pt-4 pb-3 border-b bg-gradient-to-b from-muted/30 to-transparent">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <History class="w-4 h-4 text-primary" />
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="font-bold text-sm tracking-tight leading-tight">Previous runs</div>
+                    <div class="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                        {history.length} benchmark{history.length !== 1 ? 's' : ''} recorded
+                    </div>
+                </div>
+            </div>
         </div>
-        <div class="p-3 border-b text-xs font-semibold text-muted-foreground uppercase tracking-wider bg-muted/10">
-            Previous Runs
+
+        <div class="shrink-0 px-4 py-2.5 border-b flex items-center gap-2">
+            <div class="h-[2px] w-3 rounded-full bg-primary/60"></div>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground/80">History</span>
+            <span class="ml-auto text-[10px] text-muted-foreground tabular-nums">{history.length}</span>
         </div>
-        <ScrollArea class="flex-1">
+
+        <ScrollArea class="flex-1 min-h-0">
             {#if history.length === 0}
-                <div class="p-6 text-center text-sm text-muted-foreground">
-                    No previous benchmarks found in this session.
+                <div class="flex flex-col items-center justify-center text-center p-8 mt-8">
+                    <div class="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mb-4">
+                        <BarChart3 class="w-7 h-7 text-primary/40" />
+                    </div>
+                    <p class="text-sm font-semibold text-foreground">No benchmarks yet</p>
+                    <p class="text-[11px] mt-1.5 max-w-[240px] text-muted-foreground leading-relaxed">
+                        Completed runs will appear here with their average throughput metrics.
+                    </p>
                 </div>
             {:else}
-                <Table.Root>
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.Head class="w-[160px]">Model</Table.Head>
-                            <Table.Head class="text-right text-[11px] uppercase">Runs</Table.Head>
-                            <Table.Head class="text-right text-[11px] uppercase">Avg PP</Table.Head>
-                            <Table.Head class="text-right text-[11px] uppercase">Avg TG</Table.Head>
-                            <Table.Head class="w-[30px]"></Table.Head>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {#each history as item}
-                            <Table.Row class="cursor-pointer hover:bg-muted/50 transition-colors group" onclick={() => viewHistoryDetails(item)}>
-                                <Table.Cell class="max-w-[160px] truncate" title={item.modelName}>
-                                    <div class="font-medium truncate">{item.modelName}</div>
-                                    <div class="text-[10px] text-muted-foreground mt-0.5">
-                                        {item.date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
-                                    </div>
-                                </Table.Cell>
-                                <Table.Cell class="text-right text-xs">{item.runs.length}</Table.Cell>
-                                <Table.Cell class="text-right text-xs">{item.avg_pp.toFixed(1)}</Table.Cell>
-                                <Table.Cell class="text-right text-xs font-semibold text-primary">{item.avg_tg.toFixed(1)}</Table.Cell>
-                                <Table.Cell class="text-right p-2">
-                                    <Eye class="w-4 h-4 text-muted-foreground opacity-50 group-hover:opacity-100 transition-opacity" />
-                                </Table.Cell>
-                            </Table.Row>
-                        {/each}
-                    </Table.Body>
-                </Table.Root>
+                <div class="p-3 space-y-1.5">
+                    {#each history as item}
+                        {@const accent = getHistoryAccent(item)}
+                        <button
+                            class="group w-full flex items-stretch gap-2.5 p-2.5 rounded-lg border border-transparent bg-transparent hover:bg-muted/40 hover:border-border transition-all text-left"
+                            onclick={() => viewHistoryDetails(item)}
+                        >
+                            <div class="w-1 self-stretch rounded-full {accent}"></div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="text-sm font-semibold truncate" title={item.modelName}>{item.modelName}</div>
+                                    <Eye class="w-3.5 h-3.5 text-muted-foreground/40 group-hover:text-foreground transition-colors shrink-0 mt-0.5" />
+                                </div>
+                                <div class="text-[10.5px] text-muted-foreground mt-0.5">
+                                    {item.date.toLocaleDateString()} {item.date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} · {item.runs.length} run{item.runs.length !== 1 ? 's' : ''}
+                                </div>
+                                <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-1 rounded-md border">
+                                        <Zap class="w-3 h-3 text-amber-500" />
+                                        <span class="tabular-nums">{item.avg_pp.toFixed(1)}</span>
+                                        <span class="text-muted-foreground">PP</span>
+                                    </span>
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-1 rounded-md border">
+                                        <Gauge class="w-3 h-3 text-primary" />
+                                        <span class="tabular-nums font-semibold">{item.avg_tg.toFixed(1)}</span>
+                                        <span class="text-muted-foreground">TG</span>
+                                    </span>
+                                </div>
+                            </div>
+                        </button>
+                    {/each}
+                </div>
             {/if}
         </ScrollArea>
 
         {#if history.length > 0}
-            <div class="p-4 border-t flex gap-2 bg-background/50">
-                <Button variant="outline" class="flex-1 text-xs" onclick={exportToCsv}>
-                    <Download class="w-4 h-4 mr-2" /> Export CSV
+            <div class="shrink-0 p-3 border-t flex gap-2 bg-background/50">
+                <Button variant="outline" size="sm" class="flex-1 text-xs h-8" onclick={exportToCsv}>
+                    <Download class="w-3.5 h-3.5 mr-1.5" /> Export CSV
                 </Button>
-                <Button variant="destructive" class="flex-1 text-xs" onclick={clearHistory}>
-                    <Trash2 class="w-4 h-4 mr-2" /> Clear
+                <Button variant="outline" size="sm" class="flex-1 text-xs h-8 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/40" onclick={clearHistory}>
+                    <Trash2 class="w-3.5 h-3.5 mr-1.5" /> Clear
                 </Button>
             </div>
         {/if}
     </aside>
     {/if}
 
-    <main class="flex flex-col flex-1 h-full min-w-0 relative overflow-y-auto">
-        <div class="max-w-3xl w-full mx-auto p-6 space-y-6">
-            <div>
-                <h1 class="text-2xl font-semibold tracking-tight">Benchmark Queue Execution</h1>
-                <p class="text-sm text-muted-foreground mt-1">Configure generation parameters and run your queued models.</p>
+    <main class="flex-1 h-full flex flex-col min-w-0 bg-background overflow-hidden">
+        <header class="shrink-0 flex items-center justify-between px-6 py-4 border-b bg-gradient-to-b from-muted/20 to-background">
+            <div class="flex items-center gap-3 min-w-0">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <Activity class="w-4 h-4 text-primary" />
+                </div>
+                <div class="min-w-0">
+                    <h1 class="text-base font-bold tracking-tight leading-tight">Benchmark runner</h1>
+                    <p class="text-xs text-muted-foreground leading-tight mt-0.5">
+                        Queue models and measure prefill / decode throughput
+                    </p>
+                </div>
             </div>
-            
-            <Card.Root>
-                <Card.Header>
-                    <Card.Title>Generation Parameters</Card.Title>
-                    <Card.Description>These parameters will be applied to all models in the queue.</Card.Description>
-                </Card.Header>
-                <Card.Content class="space-y-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <Label>Prompt Length (Tokens)</Label>
-                                <span class="text-xs font-medium bg-muted px-2 py-0.5 rounded">{Math.pow(2, promptPower[0])}</span>
+
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-1 rounded-md border">
+                    <Layers class="w-3 h-3 text-muted-foreground" />
+                    <span class="tabular-nums">{queue.length}</span>
+                    <span class="text-muted-foreground">queued</span>
+                </span>
+                <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-1 rounded-md border">
+                    <Server class="w-3 h-3 text-muted-foreground" />
+                    <span class="text-muted-foreground">v</span>
+                    <span class="tabular-nums">{serverVersion}</span>
+                </span>
+            </div>
+        </header>
+
+        <ScrollArea class="flex-1 min-h-0">
+            <div class="max-w-3xl w-full mx-auto p-6 space-y-6">
+                <!-- Generation parameters -->
+                <section>
+                    <div class="flex items-center gap-2 px-1 pb-2.5">
+                        <div class="h-[2px] w-3 rounded-full bg-primary/60"></div>
+                        <span class="text-[10px] font-bold uppercase tracking-widest text-foreground/80">Generation parameters</span>
+                        <span class="ml-auto text-[10px] text-muted-foreground">Applied to every run</span>
+                    </div>
+
+                    <div class="rounded-xl border bg-card overflow-hidden">
+                        <div class="flex items-center gap-3 px-4 py-3 border-b bg-gradient-to-b from-muted/20 to-background">
+                            <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                                <Sliders class="w-4 h-4 text-primary" />
                             </div>
-                            <Slider type="multiple" bind:value={promptPower} max={14} min={6} step={1} disabled={isRunningQueue} />
-                            <p class="text-xs text-muted-foreground">Context length for the pre-fill phase.</p>
+                            <div class="min-w-0">
+                                <div class="text-sm font-semibold tracking-tight">Inference knobs</div>
+                                <div class="text-[10.5px] text-muted-foreground mt-0.5">Shared across the entire queue</div>
+                            </div>
                         </div>
 
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <Label>Generation Length (Tokens)</Label>
-                                <span class="text-xs font-medium bg-muted px-2 py-0.5 rounded">{Math.pow(2, maxPower[0])}</span>
+                        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-5">
+                            <div class="space-y-2.5">
+                                <div class="flex justify-between items-center">
+                                    <Label class="text-xs font-semibold">Prompt length</Label>
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-0.5 rounded-md border tabular-nums">
+                                        {Math.pow(2, promptPower[0])} tok
+                                    </span>
+                                </div>
+                                <Slider type="multiple" bind:value={promptPower} max={14} min={6} step={1} disabled={isRunningQueue} />
+                                <p class="text-[10.5px] text-muted-foreground leading-relaxed">Context length for the pre-fill phase.</p>
                             </div>
-                            <Slider type="multiple" bind:value={maxPower} max={14} min={6} step={1} disabled={isRunningQueue} />
-                            <p class="text-xs text-muted-foreground">Tokens to generate during decode.</p>
+
+                            <div class="space-y-2.5">
+                                <div class="flex justify-between items-center">
+                                    <Label class="text-xs font-semibold">Generation length</Label>
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-0.5 rounded-md border tabular-nums">
+                                        {Math.pow(2, maxPower[0])} tok
+                                    </span>
+                                </div>
+                                <Slider type="multiple" bind:value={maxPower} max={14} min={6} step={1} disabled={isRunningQueue} />
+                                <p class="text-[10.5px] text-muted-foreground leading-relaxed">Tokens to produce during decode.</p>
+                            </div>
+
+                            <div class="space-y-2.5">
+                                <div class="flex justify-between items-center">
+                                    <Label class="text-xs font-semibold">Iterations</Label>
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-0.5 rounded-md border tabular-nums">
+                                        {iterations[0]}x
+                                    </span>
+                                </div>
+                                <Slider type="multiple" bind:value={iterations} max={10} min={1} step={1} disabled={isRunningQueue} />
+                                <p class="text-[10.5px] text-muted-foreground leading-relaxed">Repeats per queue item, metrics averaged.</p>
+                            </div>
+
+                            <div class="space-y-2.5">
+                                <div class="flex justify-between items-center">
+                                    <Label class="text-xs font-semibold">Temperature</Label>
+                                    <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-0.5 rounded-md border tabular-nums">
+                                        {temperature[0]}
+                                    </span>
+                                </div>
+                                <Slider type="multiple" bind:value={temperature} max={2} min={0} step={0.1} disabled={isRunningQueue} />
+                                <p class="text-[10.5px] text-muted-foreground leading-relaxed">Sampling temperature, 0 = deterministic.</p>
+                            </div>
                         </div>
 
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <Label>Iterations (Reruns)</Label>
-                                <span class="text-xs font-medium bg-muted px-2 py-0.5 rounded">{iterations[0]}</span>
-                            </div>
-                            <Slider type="multiple" bind:value={iterations} max={10} min={1} step={1} disabled={isRunningQueue} />
-                            <p class="text-xs text-muted-foreground">Runs multiple times per queue item and averages the metrics.</p>
-                        </div>
-
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center">
-                                <Label>Temperature</Label>
-                                <span class="text-xs font-medium bg-muted px-2 py-0.5 rounded">{temperature[0]}</span>
-                            </div>
-                            <Slider type="multiple" bind:value={temperature} max={2} min={0} step={0.1} disabled={isRunningQueue} />
+                        <div class="border-t bg-muted/10 p-4">
+                            <Button
+                                class="w-full gap-2"
+                                size="lg"
+                                onclick={runQueue}
+                                disabled={isRunningQueue || queue.length === 0}
+                            >
+                                {#if isRunningQueue}
+                                    <Loader2 class="w-5 h-5 animate-spin" />
+                                    Running queue ({queueIndex + 1} of {queue.length})
+                                {:else}
+                                    <Play class="w-5 h-5 fill-current" />
+                                    {queue.length === 0 ? 'Queue is empty' : `Run queue (${queue.length} model${queue.length !== 1 ? 's' : ''})`}
+                                {/if}
+                            </Button>
                         </div>
                     </div>
-                </Card.Content>
-                <Card.Footer class="border-t bg-muted/10 p-4">
-                    <Button 
-                        class="w-full gap-2" 
-                        size="lg"
-                        onclick={runQueue} 
-                        disabled={isRunningQueue || queue.length === 0}
-                    >
-                        {#if isRunningQueue}
-                            <Loader2 class="w-5 h-5 animate-spin" />
-                            Running Queue ({queueIndex + 1}/{queue.length})...
-                        {:else}
-                            <Play class="w-5 h-5 fill-current" />
-                            Run Queue ({queue.length} models)
-                        {/if}
-                    </Button>
-                </Card.Footer>
-            </Card.Root>
+                </section>
 
-            {#if isRunningQueue && queue[queueIndex]}
-                {@const activeItem = queue[queueIndex]}
-                <Card.Root class="border-primary/50 shadow-md">
-                    <Card.Content class="p-6">
-                        <div class="flex flex-col items-center justify-center text-center space-y-4">
-                            <div class="relative">
-                                <div class="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <!-- Active run surface -->
+                {#if isRunningQueue && queue[queueIndex]}
+                    {@const activeItem = queue[queueIndex]}
+                    {@const accent = getQueueItemAccent(activeItem)}
+                    <section>
+                        <div class="flex items-center gap-2 px-1 pb-2.5">
+                            <div class="h-[2px] w-3 rounded-full bg-amber-500"></div>
+                            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground/80">Live</span>
+                            <span class="ml-auto inline-flex items-center gap-1.5 text-[10px] text-amber-500 font-semibold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
+                                In progress
+                            </span>
+                        </div>
+
+                        <div class="rounded-xl border border-primary/50 bg-muted/40 shadow-sm ring-1 ring-primary/20 overflow-hidden">
+                            <div class="flex items-stretch gap-4 p-5">
+                                <div class="w-1 self-stretch rounded-full {accent}"></div>
+                                <div class="w-14 h-14 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
                                     {#if activeItem.status === 'loading'}
-                                        <Loader2 class="w-8 h-8 text-primary animate-spin" />
+                                        <Loader2 class="w-6 h-6 text-primary animate-spin" />
                                     {:else if activeItem.status === 'benchmarking'}
-                                        <Zap class="w-8 h-8 text-primary animate-pulse" />
+                                        <Zap class="w-6 h-6 text-primary animate-pulse" />
                                     {:else if activeItem.status === 'unloading'}
-                                        <ArrowRight class="w-8 h-8 text-primary" />
+                                        <ArrowRight class="w-6 h-6 text-primary" />
+                                    {:else}
+                                        <Loader2 class="w-6 h-6 text-primary animate-spin" />
                                     {/if}
                                 </div>
-                            </div>
-                            <div>
-                                <h3 class="text-lg font-semibold">{activeItem.modelName}</h3>
-                                <p class="text-sm text-primary font-medium mt-1 uppercase tracking-widest">
-                                    {activeItem.status === 'loading' ? 'Loading Model into VRAM...' : 
-                                     activeItem.status === 'benchmarking' ? 'Running Benchmark...' : 
-                                     activeItem.status === 'unloading' ? 'Unloading Model...' : 'Processing...'}
-                                </p>
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-sm font-semibold tracking-tight truncate">{activeItem.modelName}</div>
+                                    <div class="text-[11px] uppercase tracking-widest text-primary font-semibold mt-1">
+                                        {activeItem.status === 'loading' ? 'Loading model into VRAM' :
+                                         activeItem.status === 'benchmarking' ? 'Running benchmark' :
+                                         activeItem.status === 'unloading' ? 'Unloading model' : 'Processing'}
+                                    </div>
+                                    <div class="flex items-center gap-1.5 mt-2.5 flex-wrap">
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-1 rounded-md border">
+                                            <Box class="w-3 h-3 text-muted-foreground" />
+                                            <span class="uppercase tracking-wide">{activeItem.modelType}</span>
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-1 rounded-md border">
+                                            <Server class="w-3 h-3 text-muted-foreground" />
+                                            <span class="font-mono truncate max-w-[180px]">{activeItem.device}</span>
+                                        </span>
+                                    </div>
+                                </div>
                             </div>
                         </div>
-                    </Card.Content>
-                </Card.Root>
-            {/if}
+                    </section>
+                {/if}
 
-        </div>
+                <!-- Tips / empty-state when no queue and idle -->
+                {#if queue.length === 0 && !isRunningQueue}
+                    <section>
+                        <div class="rounded-xl border border-dashed bg-muted/10 p-8 flex flex-col items-center text-center">
+                            <div class="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mb-4">
+                                <FlaskConical class="w-7 h-7 text-primary/40" />
+                            </div>
+                            <p class="text-sm font-semibold text-foreground">Queue is empty</p>
+                            <p class="text-xs mt-1.5 max-w-sm text-muted-foreground leading-relaxed">
+                                Use the queue panel on the right to pick a local LLM or VLM, choose a device, and enqueue it.
+                                Adjust the parameters above and hit run.
+                            </p>
+                        </div>
+                    </section>
+                {/if}
+            </div>
+        </ScrollArea>
     </main>
 
     {#if appState.rightPanelOpen}
-    <aside class="w-[450px] shrink-0 border-l bg-muted/20 flex flex-col h-full transition-all duration-200">
-        <div class="p-4 border-b font-bold text-lg">Benchmark Queue</div>
-        
-        <div class="p-4 border-b bg-background space-y-4">
-            <h3 class="text-sm font-semibold">Add to Queue</h3>
-            <div class="space-y-3">
+    <aside class="w-[450px] shrink-0 border-l bg-muted/10 flex flex-col h-full overflow-hidden transition-all duration-200">
+        <div class="shrink-0 px-4 pt-4 pb-3 border-b bg-gradient-to-b from-muted/30 to-transparent">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
+                    <Layers class="w-4 h-4 text-primary" />
+                </div>
+                <div class="min-w-0 flex-1">
+                    <div class="font-bold text-sm tracking-tight leading-tight">Benchmark queue</div>
+                    <div class="text-[11px] text-muted-foreground leading-tight mt-0.5">
+                        {queue.length} model{queue.length !== 1 ? 's' : ''} ready to run
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Add to queue section -->
+        <div class="shrink-0 border-b bg-background/60">
+            <div class="px-4 py-2.5 flex items-center gap-2">
+                <div class="h-[2px] w-3 rounded-full bg-primary/60"></div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-foreground/80">Add to queue</span>
+            </div>
+
+            <div class="px-4 pb-4 space-y-3">
                 <div class="space-y-1.5">
-                    <Label class="text-xs">Select Local Model</Label>
+                    <Label class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Local model</Label>
                     <Popover.Root bind:open={modelComboboxOpen}>
                         <Popover.Trigger>
                             {#snippet child({ props })}
@@ -561,14 +695,14 @@
                                     variant="outline"
                                     role="combobox"
                                     aria-expanded={modelComboboxOpen}
-                                    class="w-full h-8 text-xs justify-between"
+                                    class="w-full h-9 text-xs justify-between bg-background"
                                     disabled={localModels.length === 0 || isRunningQueue}
                                 >
                                     {#if selectedLocalModelPath}
                                         {@const m = localModels.find((x:any) => x.path === selectedLocalModelPath)}
                                         <span class="truncate">{m?.model_name || "Select model"}</span>
                                     {:else}
-                                        "No local models found"
+                                        <span class="text-muted-foreground">No local models found</span>
                                     {/if}
                                     <ChevronsUpDown class="ml-2 h-4 w-4 shrink-0 opacity-50" />
                                 </Button>
@@ -595,6 +729,7 @@
                                                         selectedLocalModelPath === model.path ? "opacity-100" : "opacity-0"
                                                     )}
                                                 />
+                                                <div class="w-1 self-stretch rounded-full mr-2 {getArchAccent(model.model_type)}" style="height:14px"></div>
                                                 <span class="truncate">{model.model_name}</span>
                                             </Command.Item>
                                         {/each}
@@ -604,12 +739,12 @@
                         </Popover.Content>
                     </Popover.Root>
                 </div>
-                
+
                 <div class="space-y-1.5">
-                    <Label class="text-xs">Device</Label>
+                    <Label class="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">Device</Label>
                     <div class="flex gap-2">
                         <Select.Root type="single" bind:value={addDeviceMode} disabled={isRunningQueue}>
-                            <Select.Trigger class="h-8 text-xs flex-1">
+                            <Select.Trigger class="h-9 text-xs flex-1 bg-background">
                                 {#if addDeviceMode}
                                     {@const activeDevice = availableDevices.find((d:any) => d.value === addDeviceMode)}
                                     <span class="truncate">{activeDevice?.label || addDeviceMode}</span>
@@ -623,26 +758,26 @@
                                 {/each}
                             </Select.Content>
                         </Select.Root>
-                        
+
                         {#if addDeviceMode === "CUSTOM"}
-                            <Input 
-                                bind:value={customDevice} 
-                                placeholder="e.g. GPU.1" 
-                                class="h-8 text-xs flex-1" 
-                                disabled={isRunningQueue} 
+                            <Input
+                                bind:value={customDevice}
+                                placeholder="e.g. GPU.1"
+                                class="h-9 text-xs flex-1 bg-background"
+                                disabled={isRunningQueue}
                             />
                         {:else if addDeviceMode === "HETERO"}
                             <div class="flex gap-2 flex-1">
-                                <Input 
-                                    value={heteroDeviceString} 
-                                    readonly 
-                                    class="h-8 text-xs flex-1 min-w-[120px]" 
-                                    disabled={isRunningQueue} 
+                                <Input
+                                    value={heteroDeviceString}
+                                    readonly
+                                    class="h-9 text-xs flex-1 min-w-[120px] bg-muted/40 font-mono"
+                                    disabled={isRunningQueue}
                                 />
-                                <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    class="h-8 text-xs px-2" 
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    class="h-9 text-xs px-2.5"
                                     onclick={() => isHeteroDialogOpen = true}
                                     disabled={isRunningQueue}
                                 >
@@ -653,79 +788,120 @@
                     </div>
                 </div>
 
-                <div class="flex items-center justify-between">
-                    <Label class="text-xs cursor-pointer" for="load-before">Load Before Run</Label>
-                    <Switch id="load-before" bind:checked={addLoadBefore} disabled={isRunningQueue} />
-                </div>
-                
-                <div class="flex items-center justify-between">
-                    <Label class="text-xs cursor-pointer" for="unload-after">Unload After Run</Label>
-                    <Switch id="unload-after" bind:checked={addUnloadAfter} disabled={isRunningQueue} />
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md border bg-background cursor-pointer">
+                        <span class="text-[11px] font-medium">Load before</span>
+                        <Switch bind:checked={addLoadBefore} disabled={isRunningQueue} />
+                    </label>
+                    <label class="flex items-center justify-between gap-2 px-2.5 py-1.5 rounded-md border bg-background cursor-pointer">
+                        <span class="text-[11px] font-medium">Unload after</span>
+                        <Switch bind:checked={addUnloadAfter} disabled={isRunningQueue} />
+                    </label>
                 </div>
 
-                <Button class="w-full h-8 text-xs gap-1.5" onclick={addToQueue} disabled={!selectedLocalModelPath || isRunningQueue || (addDeviceMode === 'CUSTOM' && !customDevice) || (addDeviceMode === 'HETERO' && heteroSelectedDevices.length === 0)}>
-                    <Plus class="w-3.5 h-3.5" /> Enqueue Model
+                <Button
+                    class="w-full h-9 text-xs gap-1.5"
+                    onclick={addToQueue}
+                    disabled={!selectedLocalModelPath || isRunningQueue || (addDeviceMode === 'CUSTOM' && !customDevice) || (addDeviceMode === 'HETERO' && heteroSelectedDevices.length === 0)}
+                >
+                    <Plus class="w-3.5 h-3.5" /> Enqueue model
                 </Button>
             </div>
         </div>
 
-        <ScrollArea class="flex-1">
+        <div class="shrink-0 px-4 py-2.5 border-b flex items-center gap-2">
+            <div class="h-[2px] w-3 rounded-full bg-primary/60"></div>
+            <span class="text-[10px] font-bold uppercase tracking-widest text-foreground/80">Queue</span>
+            <span class="ml-auto text-[10px] text-muted-foreground tabular-nums">{queue.length}</span>
+        </div>
+
+        <ScrollArea class="flex-1 min-h-0">
             {#if queue.length === 0}
-                <div class="text-center text-xs text-muted-foreground p-6">
-                    The queue is empty. Add local models to run a batch benchmark.
+                <div class="flex flex-col items-center justify-center text-center p-8 mt-4">
+                    <div class="w-16 h-16 rounded-2xl bg-primary/5 border border-primary/10 flex items-center justify-center mb-4">
+                        <Layers class="w-7 h-7 text-primary/40" />
+                    </div>
+                    <p class="text-sm font-semibold text-foreground">Queue is empty</p>
+                    <p class="text-[11px] mt-1.5 max-w-[240px] text-muted-foreground leading-relaxed">
+                        Enqueue a local LLM or VLM above to build a batch benchmark.
+                    </p>
                 </div>
             {:else}
-                <Table.Root>
-                    <Table.Header>
-                        <Table.Row>
-                            <Table.Head class="w-[30px] font-semibold text-center">#</Table.Head>
-                            <Table.Head class="font-semibold">Model</Table.Head>
-                            <Table.Head class="font-semibold text-xs">Config</Table.Head>
-                            <Table.Head class="font-semibold text-xs">Status</Table.Head>
-                            <Table.Head class="w-[40px]"></Table.Head>
-                        </Table.Row>
-                    </Table.Header>
-                    <Table.Body>
-                        {#each queue as item, i}
-                            <Table.Row class={item.status === 'benchmarking' ? 'bg-primary/5' : item.status === 'error' ? 'bg-destructive/5' : item.status === 'completed' ? 'bg-emerald-500/5' : ''}>
-                                <Table.Cell class="text-xs text-muted-foreground text-center font-medium">{i + 1}</Table.Cell>
-                                <Table.Cell class="max-w-[120px] truncate" title={item.modelName}>
-                                    <div class="font-semibold truncate text-xs">{item.modelName}</div>
-                                </Table.Cell>
-                                <Table.Cell class="text-[10px] text-muted-foreground whitespace-nowrap">
-                                    <div class="font-medium">{item.device}</div>
-                                    <div>{item.loadBefore?'Load':'-'} / {item.unloadAfter?'Unload':'-'}</div>
-                                </Table.Cell>
-                                <Table.Cell class="text-xs whitespace-nowrap">
-                                    {#if item.status === 'loading'}
-                                        <span class="text-amber-500 flex items-center gap-1"><Loader2 class="w-3 h-3 animate-spin" /> Load</span>
-                                    {:else if item.status === 'benchmarking'}
-                                        <span class="text-primary flex items-center gap-1"><Zap class="w-3 h-3 animate-pulse" /> Bench</span>
-                                    {:else if item.status === 'unloading'}
-                                        <span class="text-blue-500 flex items-center gap-1"><Loader2 class="w-3 h-3 animate-spin" /> Unload</span>
-                                    {:else if item.status === 'completed' && item.result}
-                                        <span class="text-emerald-500 flex items-center gap-1 font-semibold" title={`Avg PP: ${item.result.avg_pp.toFixed(1)} | Avg TG: ${item.result.avg_tg.toFixed(1)}`}>
-                                            <CheckCircle2 class="w-3 h-3" /> {item.result.avg_pp.toFixed(0)}/{item.result.avg_tg.toFixed(0)}
-                                        </span>
-                                    {:else if item.status === 'error'}
-                                        <span class="text-destructive flex items-center gap-1 truncate max-w-[50px]" title={item.error}>
-                                            <XCircle class="w-3 h-3 shrink-0" /> Err
-                                        </span>
-                                    {:else}
-                                        <span class="text-muted-foreground opacity-50">Idle</span>
-                                    {/if}
-                                </Table.Cell>
-                                <Table.Cell class="p-2 text-right">
+                <div class="p-3 space-y-1.5">
+                    {#each queue as item, i}
+                        {@const accent = getQueueItemAccent(item)}
+                        {@const isActive = isRunningQueue && i === queueIndex}
+                        <div
+                            class="relative flex items-stretch gap-2.5 p-2.5 rounded-lg border transition-all
+                                {isActive ? 'bg-muted/40 border-primary/50 shadow-sm ring-1 ring-primary/20' :
+                                 item.status === 'error' ? 'bg-destructive/5 border-destructive/30' :
+                                 item.status === 'completed' ? 'bg-emerald-500/5 border-emerald-500/30' :
+                                 'bg-transparent border-border hover:bg-muted/30'}"
+                        >
+                            <div class="w-1 self-stretch rounded-full {accent}"></div>
+                            <div class="flex items-center justify-center w-6 h-6 shrink-0 rounded-md bg-muted/60 text-[10px] font-bold text-muted-foreground tabular-nums">
+                                {i + 1}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-start justify-between gap-2">
+                                    <div class="text-sm font-semibold truncate" title={item.modelName}>{item.modelName}</div>
                                     {#if !isRunningQueue && item.status !== 'completed'}
-                                        <button class="text-muted-foreground hover:text-destructive transition-colors" onclick={() => removeFromQueue(item.id)}>
-                                            <Trash2 class="w-4 h-4" />
+                                        <button
+                                            class="shrink-0 p-0.5 text-muted-foreground/60 hover:text-destructive transition-colors"
+                                            onclick={() => removeFromQueue(item.id)}
+                                            aria-label="Remove from queue"
+                                        >
+                                            <Trash2 class="w-3.5 h-3.5" />
                                         </button>
                                     {/if}
-                                </Table.Cell>
-                            </Table.Row>
-                        {/each}
-                    </Table.Body>
-                </Table.Root>
+                                </div>
+                                <div class="text-[10.5px] text-muted-foreground mt-0.5 truncate">
+                                    <span class="font-mono">{item.device}</span>
+                                    <span class="opacity-60"> · </span>
+                                    <span>{item.loadBefore ? 'Load' : 'No-load'} / {item.unloadAfter ? 'Unload' : 'Keep'}</span>
+                                </div>
+                                <div class="flex items-center gap-1.5 mt-2 flex-wrap">
+                                    {#if item.status === 'loading'}
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-amber-500/10 text-amber-600 dark:text-amber-400 px-2 py-1 rounded-md border border-amber-500/30">
+                                            <Loader2 class="w-3 h-3 animate-spin" /> Loading
+                                        </span>
+                                    {:else if item.status === 'benchmarking'}
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-primary/10 text-primary px-2 py-1 rounded-md border border-primary/30">
+                                            <Zap class="w-3 h-3 animate-pulse" /> Benchmarking
+                                        </span>
+                                    {:else if item.status === 'unloading'}
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-blue-500/10 text-blue-500 px-2 py-1 rounded-md border border-blue-500/30">
+                                            <Loader2 class="w-3 h-3 animate-spin" /> Unloading
+                                        </span>
+                                    {:else if item.status === 'completed' && item.result}
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-1 rounded-md border border-emerald-500/30">
+                                            <CheckCircle2 class="w-3 h-3" /> Done
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-1 rounded-md border" title="Average prefill throughput">
+                                            <Zap class="w-3 h-3 text-amber-500" />
+                                            <span class="tabular-nums">{item.result.avg_pp.toFixed(1)}</span>
+                                            <span class="text-muted-foreground">PP</span>
+                                        </span>
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/50 text-foreground px-2 py-1 rounded-md border" title="Average decode throughput">
+                                            <Gauge class="w-3 h-3 text-primary" />
+                                            <span class="tabular-nums font-semibold">{item.result.avg_tg.toFixed(1)}</span>
+                                            <span class="text-muted-foreground">TG</span>
+                                        </span>
+                                    {:else if item.status === 'error'}
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-destructive/10 text-destructive px-2 py-1 rounded-md border border-destructive/30 max-w-full truncate" title={item.error}>
+                                            <XCircle class="w-3 h-3 shrink-0" />
+                                            <span class="truncate">Failed</span>
+                                        </span>
+                                    {:else}
+                                        <span class="inline-flex items-center gap-1.5 text-[11px] bg-muted/30 text-muted-foreground px-2 py-1 rounded-md border">
+                                            <Play class="w-3 h-3" /> Idle
+                                        </span>
+                                    {/if}
+                                </div>
+                            </div>
+                        </div>
+                    {/each}
+                </div>
             {/if}
         </ScrollArea>
     </aside>
@@ -735,42 +911,52 @@
 <Dialog.Root bind:open={isHistoryDialogOpen}>
     <Dialog.Content class="max-w-2xl">
         <Dialog.Header>
-            <Dialog.Title>Benchmark Details</Dialog.Title>
+            <Dialog.Title>Benchmark details</Dialog.Title>
             <Dialog.Description>
-                Model: {selectedHistoryItem?.modelName}
+                {selectedHistoryItem?.modelName}
             </Dialog.Description>
         </Dialog.Header>
-        
+
         <div class="my-4">
             {#if selectedHistoryItem}
-            <div class="flex gap-4 mb-4">
-                <div class="bg-muted/50 p-3 rounded-lg flex-1 text-center">
-                    <div class="text-xs text-muted-foreground uppercase font-semibold">Avg Prefill (PP)</div>
-                    <div class="text-lg font-bold text-primary">{selectedHistoryItem.avg_pp.toFixed(2)} t/s</div>
+            <div class="flex gap-3 mb-4">
+                <div class="flex-1 rounded-xl border bg-card p-4">
+                    <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <Zap class="w-3 h-3 text-amber-500" /> Avg prefill (PP)
+                    </div>
+                    <div class="text-2xl font-bold text-foreground mt-2 tabular-nums">
+                        {selectedHistoryItem.avg_pp.toFixed(2)}
+                        <span class="text-sm font-medium text-muted-foreground">t/s</span>
+                    </div>
                 </div>
-                <div class="bg-muted/50 p-3 rounded-lg flex-1 text-center">
-                    <div class="text-xs text-muted-foreground uppercase font-semibold">Avg Decode (TG)</div>
-                    <div class="text-lg font-bold text-primary">{selectedHistoryItem.avg_tg.toFixed(2)} t/s</div>
+                <div class="flex-1 rounded-xl border bg-card p-4">
+                    <div class="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-muted-foreground">
+                        <Gauge class="w-3 h-3 text-primary" /> Avg decode (TG)
+                    </div>
+                    <div class="text-2xl font-bold text-primary mt-2 tabular-nums">
+                        {selectedHistoryItem.avg_tg.toFixed(2)}
+                        <span class="text-sm font-medium text-muted-foreground">t/s</span>
+                    </div>
                 </div>
             </div>
-            
-            <div class="border rounded-md">
+
+            <div class="rounded-xl border overflow-hidden">
                 <Table.Root>
                     <Table.Header>
                         <Table.Row>
-                            <Table.Head class="w-[80px] font-semibold">Run #</Table.Head>
-                            <Table.Head class="font-semibold">Prefill (PP)</Table.Head>
-                            <Table.Head class="font-semibold">Decode (TG)</Table.Head>
-                            <Table.Head class="text-right font-semibold">Duration</Table.Head>
+                            <Table.Head class="w-[80px] text-[10px] font-bold uppercase tracking-wider">Run</Table.Head>
+                            <Table.Head class="text-[10px] font-bold uppercase tracking-wider">Prefill (PP)</Table.Head>
+                            <Table.Head class="text-[10px] font-bold uppercase tracking-wider">Decode (TG)</Table.Head>
+                            <Table.Head class="text-right text-[10px] font-bold uppercase tracking-wider">Duration</Table.Head>
                         </Table.Row>
                     </Table.Header>
                     <Table.Body>
                         {#each selectedHistoryItem.runs as run, i}
                         <Table.Row>
-                            <Table.Cell class="font-medium text-muted-foreground">{i + 1}</Table.Cell>
-                            <Table.Cell>{run.pp.toFixed(2)} t/s</Table.Cell>
-                            <Table.Cell>{run.tg.toFixed(2)} t/s</Table.Cell>
-                            <Table.Cell class="text-right">{run.time.toFixed(2)} s</Table.Cell>
+                            <Table.Cell class="font-medium text-muted-foreground tabular-nums">#{i + 1}</Table.Cell>
+                            <Table.Cell class="tabular-nums">{run.pp.toFixed(2)} <span class="text-muted-foreground">t/s</span></Table.Cell>
+                            <Table.Cell class="tabular-nums font-semibold">{run.tg.toFixed(2)} <span class="text-muted-foreground font-normal">t/s</span></Table.Cell>
+                            <Table.Cell class="text-right tabular-nums">{run.time.toFixed(2)} <span class="text-muted-foreground">s</span></Table.Cell>
                         </Table.Row>
                         {/each}
                     </Table.Body>
@@ -778,7 +964,7 @@
             </div>
             {/if}
         </div>
-        
+
         <Dialog.Footer>
             <Button variant="outline" onclick={() => isHistoryDialogOpen = false}>Close</Button>
         </Dialog.Footer>
@@ -788,21 +974,33 @@
 <Dialog.Root bind:open={isHeteroDialogOpen}>
     <Dialog.Content class="sm:max-w-xl">
         <Dialog.Header>
-            <Dialog.Title>Configure HETERO Device</Dialog.Title>
+            <Dialog.Title>Configure HETERO device</Dialog.Title>
             <Dialog.Description>
-                Select multiple devices to split the workload. The order matters (e.g., GPU.0,CPU will prefer GPU.0 first).
+                Select multiple devices to split the workload. Order matters (e.g. GPU.0,CPU prefers GPU.0 first).
             </Dialog.Description>
         </Dialog.Header>
-        
-        <div class="space-y-4 my-4">
-            <div class="text-xs font-semibold uppercase text-muted-foreground mb-2">Available Devices</div>
-            <div class="flex flex-col gap-3">
+
+        <div class="space-y-3 my-4">
+            <div class="flex items-center gap-2 px-1">
+                <div class="h-[2px] w-3 rounded-full bg-primary/60"></div>
+                <span class="text-[10px] font-bold uppercase tracking-widest text-foreground/80">Available devices</span>
+            </div>
+            <div class="flex flex-col gap-2">
                 {#each availableDevices.filter(d => d.value !== 'AUTO' && d.value !== 'CUSTOM' && d.value !== 'HETERO') as dev}
-                    <div class="flex items-center justify-between p-2 rounded-md border hover:bg-muted/50 transition-colors">
-                        <Label class="flex-1 cursor-pointer font-medium text-sm" for={`hetero-${dev.value}`}>{dev.label}</Label>
-                        <Switch 
+                    {@const active = heteroSelectedDevices.includes(dev.value)}
+                    <label
+                        for={`hetero-${dev.value}`}
+                        class="flex items-stretch gap-2.5 p-2.5 rounded-lg border cursor-pointer transition-all
+                            {active ? 'bg-muted/40 border-primary/50 shadow-sm ring-1 ring-primary/20' : 'bg-transparent border-border hover:bg-muted/30'}"
+                    >
+                        <div class="w-1 self-stretch rounded-full {active ? 'bg-primary' : 'bg-muted-foreground/30'}"></div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-sm font-semibold truncate">{dev.label}</div>
+                            <div class="text-[10.5px] text-muted-foreground font-mono mt-0.5">{dev.value}</div>
+                        </div>
+                        <Switch
                             id={`hetero-${dev.value}`}
-                            checked={heteroSelectedDevices.includes(dev.value)}
+                            checked={active}
                             onCheckedChange={(v: boolean) => {
                                 if (v) {
                                     heteroSelectedDevices = [...heteroSelectedDevices, dev.value];
@@ -811,21 +1009,23 @@
                                 }
                             }}
                         />
-                    </div>
+                    </label>
                 {/each}
             </div>
 
             {#if heteroSelectedDevices.length > 0}
-            <div class="mt-4 p-3 bg-muted/30 rounded-md text-sm border border-border/50">
-                <span class="font-semibold text-muted-foreground mr-2">Result:</span> 
-                <span class="text-primary font-mono">{heteroDeviceString}</span>
-                <p class="text-xs text-muted-foreground mt-2">
-                    To change the priority order, unselect and re-select devices in your preferred order.
+            <div class="rounded-xl border bg-muted/20 p-3">
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Resulting string</span>
+                </div>
+                <div class="font-mono text-sm text-primary break-all">{heteroDeviceString}</div>
+                <p class="text-[10.5px] text-muted-foreground mt-2 leading-relaxed">
+                    To change priority order, unselect and re-select devices in your preferred order.
                 </p>
             </div>
             {/if}
         </div>
-        
+
         <Dialog.Footer>
             <Button onclick={() => isHeteroDialogOpen = false}>Done</Button>
         </Dialog.Footer>

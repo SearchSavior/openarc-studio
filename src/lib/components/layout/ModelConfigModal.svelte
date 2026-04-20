@@ -5,6 +5,11 @@
     import { Loader2, Settings2, AlertTriangle } from "@lucide/svelte";
     import { openarc } from "$lib/client.svelte.js";
     import { appState } from "$lib/state.svelte.js";
+    import {
+        MODEL_TYPES,
+        detectModelType,
+        resolveModelType,
+    } from "$lib/model-types";
 
     import { onMount } from "svelte";
 
@@ -33,13 +38,19 @@
             errorMessage = "";
             modelName =
                 modelInfo.model_name || modelInfo.name || modelInfo.id || "";
-            let incomingType =
+            const incoming =
                 modelInfo.model_type ||
                 modelInfo.architecture ||
                 modelInfo.type ||
-                "LLM";
-            if (incomingType.toUpperCase() === "UNKNOWN") incomingType = "LLM";
-            modelType = incomingType.toUpperCase();
+                "";
+            const resolved =
+                resolveModelType(incoming) ??
+                (detectModelType(modelName, modelInfo.path)
+                    ? resolveModelType(
+                          detectModelType(modelName, modelInfo.path),
+                      )
+                    : null);
+            modelType = (resolved ?? MODEL_TYPES[0]).label;
         }
     });
 
@@ -115,12 +126,9 @@
                     bind:value={modelType}
                     class="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    <option value="LLM">LLM (Text Generation)</option>
-                    <option value="VLM">VLM (Vision-Language)</option>
-                    <option value="STT">STT (Speech-to-Text)</option>
-                    <option value="TTS">TTS (Text-to-Speech)</option>
-                    <option value="EMBEDDING">Embedding</option>
-                    <option value="RERANKER">Reranker</option>
+                    {#each MODEL_TYPES as entry}
+                        <option value={entry.label}>{entry.description}</option>
+                    {/each}
                 </select>
             </div>
         </div>

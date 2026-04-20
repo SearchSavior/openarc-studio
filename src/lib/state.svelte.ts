@@ -8,7 +8,9 @@ export type AppSettings = {
   startOnBoot: boolean;
   autoUpdate: boolean;
   compactMode: boolean;
+  autoScroll: boolean;
   defaultModelPath: string;
+  curatedManifestUrl: string;
 };
 
 export type LogLevel = "error" | "warn" | "info" | "v1" | "v2" | "v3" | "v4";
@@ -27,6 +29,10 @@ export const appState = $state({
   leftPanelOpen: true,
   rightPanelOpen: true,
   hasCompletedSetup: false,
+
+  activeLlmModel: null as string | null,
+  activeSttModel: null as string | null,
+  activeTtsModel: null as string | null,
 
   logs: [] as LogEntry[],
 
@@ -56,7 +62,9 @@ export const appState = $state({
     startOnBoot: false,
     autoUpdate: true,
     compactMode: false,
+    autoScroll: true,
     defaultModelPath: "/home/user/models",
+    curatedManifestUrl: "",
   } as AppSettings,
 
   async saveSettings() {

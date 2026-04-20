@@ -4,10 +4,16 @@ This is a GUI app for managing an OpenArc instance. Basically, it lets you use O
 
 > [!IMPORTANT]
 > The setup process to install a local OpenArc server isn't included yet. For now, you need to connect to an OpenArc server that's already running.
+> The OpenArc version must contain the necessary OpenArc API endpoints for the features you want to use.
+
+### Notable Special Features
+- **Voice Profiles**: You can create voice profiles for TTS generation. You can either create one with the voice design tool or you can clone an existing voice with the voice cloning tool. You can then use these voice profiles to generate TTS audio with the TTS generation feature in the voice studio.
+- **Benchmark Tool**: You can run benchmarks on your hardware to see how well it performs with different models.
+- **Curated Model List**: You can browse a curated list of models and download them directly from the app. This is currently local, but in the future, the manifest/repo will be hosted either on the OpenArc repo, or on a separate repo.
 
 ### Screenshots
 
-*Note: For the screenshots below, keep in mind that the **Voice Studio** and **Chat** are just UI mockups for now and are not functionally implemented yet. The rest of the features shown are currently half-implemented or in active development.*
+
 
 #### Chat
 ![Chat](display-images/chat.png)
@@ -32,15 +38,14 @@ This is a GUI app for managing an OpenArc instance. Basically, it lets you use O
 #### Voice Studio
 ![Voice Studio - STT](display-images/voice-studio-stt.png)
 ![Voice Studio - TTS Generation](display-images/voice-studio-tts-generation.png)
-![Voice Studio - Voice Cloning](display-images/voice-studio-tts-voice-cloing.png)
+![Voice Studio - Voice Cloning](display-images/voice-studio-tts-voice-cloning.png)
 ![Voice Studio - Voice Design](display-images/voice-studio-tts-voice-design.png)
 
 ---
 
 ### Short-term to do list
-- Add buttons to actually start/stop the local server from the UI, plus a view for the console logs
-- A real download manager (with pause/cancel and progress bars)
+- Add buttons to actually start/stop the local server from the UI, plus a view for the console logs (this will be implemented when the local server setup process is implemented)
+- A fully functional download manager (with pause/cancel and progress bars (do not work perfectly))
 - Make the app automatically find OpenVINO models you already have on your hard drive
-- Basic desktop app stuff (saving your settings, a hardware resource monitor, making external links open in your browser)
-- Voice features: recording from your mic, text-to-speech, and custom voice cloning
-- Chatting features: it's not working yet :)
+- Basic desktop app stuff (a hardware resource monitor (half implemented), making external links open in your browser)
+- Voice feature: recording from your mic

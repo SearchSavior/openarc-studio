@@ -12,6 +12,7 @@
     import Onboarding from "$lib/components/layout/Onboarding.svelte";
     import { appState } from "$lib/state.svelte.js";
     import { openarc } from "$lib/client.svelte.js";
+    import { chatStore } from "$lib/chat.svelte.js";
 
     let { children } = $props();
     let isInitialized = $state(false);
@@ -19,6 +20,7 @@
     onMount(async () => {
         appState.addLog('info', 'Application layout mounted');
         await appState.loadSettings();
+        await chatStore.loadAll();
         if (appState.hasCompletedSetup) {
             try {
                 await openarc.configure(appState.settings.remoteEndpoint, appState.settings.apiKey);

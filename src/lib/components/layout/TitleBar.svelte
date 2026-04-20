@@ -1,13 +1,12 @@
 <script lang="ts">
     import { Minus, Square, X, Hexagon } from "@lucide/svelte";
-    // we mock window api if not run in tauri (like dev server no tauri)
     import { onMount } from "svelte";
 
     let windowAPI: any = null;
 
     onMount(async () => {
         try {
-            // dynamic import tauri api so standard vite dev server not break
+            // dynamic import so the vite dev server doesnt break
             const { getCurrentWindow } = await import("@tauri-apps/api/window");
             windowAPI = getCurrentWindow();
         } catch (e) {
