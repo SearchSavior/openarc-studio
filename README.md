@@ -13,33 +13,89 @@ This is a GUI app for managing an OpenArc instance. Basically, it lets you use O
 
 ### Screenshots
 
+<details>
+<summary>Chat</summary>
 
-
-#### Chat
 ![Chat](display-images/chat.png)
 
-#### Models & Downloader
+</details>
+
+<details>
+<summary>Models & Downloader</summary>
+
 ![Models List](display-images/models-list.png)
 ![Downloader](display-images/downloader.png)
 
-#### Server Management
+</details>
+
+<details>
+<summary>Server Management</summary>
+
 ![OpenArc Server Stuff](display-images/openarc-server-stuff.png)
 ![OpenArc Server API Endpoints](display-images/openarc-server-api-endpoints.png)
 
-#### Benchmark Tool
+</details>
+
+<details>
+<summary>Benchmark Tool</summary>
+
 ![Benchmark Tool](display-images/benchmark-tool.png)
 ![Benchmark Results](display-images/benchmark-results.png)
 
-#### Settings & Stats
+</details>
+
+<details>
+<summary>Settings & Stats</summary>
+
 ![Hardware Stats](display-images/settings-hardware-stats.png)
 ![Runtime Settings](display-images/settings-runtime.png)
 ![System Logs](display-images/settings-system-logs.png)
 
-#### Voice Studio
+</details>
+
+<details>
+<summary>Voice Studio</summary>
+
 ![Voice Studio - STT](display-images/voice-studio-stt.png)
 ![Voice Studio - TTS Generation](display-images/voice-studio-tts-generation.png)
 ![Voice Studio - Voice Cloning](display-images/voice-studio-tts-voice-cloning.png)
 ![Voice Studio - Voice Design](display-images/voice-studio-tts-voice-design.png)
+
+</details>
+
+---
+
+### Building from Source
+
+You'll need a few things installed before you can build the app:
+
+- [Bun](https://bun.sh) — used instead of npm/yarn
+- [Rust](https://rustup.rs) — needed for the Tauri backend (stable toolchain is fine)
+- The usual Tauri system dependencies for your OS — [check the Tauri docs](https://v2.tauri.app/start/prerequisites/) if you're not sure what's missing
+
+Once you have those, it's pretty straightforward:
+
+**1. Clone the repo and install frontend dependencies**
+```bash
+git clone https://github.com/SearchSavior/openarc-studio
+cd openarc-studio
+bun install
+```
+
+**2. Run in dev mode** (hot reload, opens the app window)
+```bash
+bun run tauri dev
+```
+
+**3. Or build a distributable binary**
+```bash
+bun run tauri build
+```
+
+The output ends up in `src-tauri/target/release/bundle/`. On Linux you'll get an AppImage and a .deb. On Windows you'll get an .msi and an NSIS installer.
+
+> [!NOTE]
+> The first build takes a while because Cargo has to compile all the Rust dependencies. Subsequent builds are much faster.
 
 ---
 
