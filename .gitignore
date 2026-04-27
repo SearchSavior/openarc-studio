@@ -18,6 +18,7 @@ pnpm-debug.log*
 src-tauri/target/
 target/
 *.rs.bk
+/artifacts
 
 __pycache__/
 *.py[cod]

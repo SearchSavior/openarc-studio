@@ -72,8 +72,24 @@ You'll need a few things installed before you can build the app:
 - [Bun](https://bun.sh) — used instead of npm/yarn
 - [Rust](https://rustup.rs) — needed for the Tauri backend (stable toolchain is fine)
 - The usual Tauri system dependencies for your OS — [check the Tauri docs](https://v2.tauri.app/start/prerequisites/) if you're not sure what's missing
+- `libfuse2` — required on Linux for the AppImage bundler (`sudo apt install libfuse2` on Debian/Ubuntu)
+- `appimagetool` — required for creating AppImages. Tauri tries to download it automatically, but if that fails you can grab the prebuilt AppImage from [AppImage/appimagetool](https://github.com/AppImage/appimagetool/releases) and extract the binary to somewhere in your `PATH` (e.g. `~/.local/bin/`)
 
 Once you have those, it's pretty straightforward:
+
+**Linux users:** run `./build.sh` to handle distro-specific checks and fixes automatically:
+
+```bash
+./build.sh
+```
+
+**Or do it manually:**
+
+> [!IMPORTANT]
+> On rolling-release distros like Arch Linux, the `strip` binary bundled inside `linuxdeploy` is too old to handle modern ELF `.relr.dyn` sections. If AppImage bundling fails with `failed to run linuxdeploy`, build with `NO_STRIP=1`:
+> ```bash
+> NO_STRIP=1 bun run tauri build
+> ```
 
 **1. Clone the repo and install frontend dependencies**
 ```bash
