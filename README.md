@@ -77,7 +77,7 @@ Once you have those, it's pretty straightforward:
 
 **1. Clone the repo and install frontend dependencies**
 ```bash
-git clone https://github.com/SearchSavior/openarc-studio
+git clone --recursive https://github.com/SearchSavior/openarc-studio
 cd openarc-studio
 bun install
 ```
