@@ -63,7 +63,7 @@ export const appState = $state({
     autoUpdate: true,
     compactMode: false,
     autoScroll: true,
-    defaultModelPath: "/home/user/models",
+    defaultModelPath: "~/.cache/openarc/models",
     curatedManifestUrl: "",
   } as AppSettings,
 

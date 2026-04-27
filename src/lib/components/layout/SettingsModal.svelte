@@ -278,22 +278,32 @@
                                                         .defaultModelPath
                                                 }
                                                 readonly
-                                                class="h-9 bg-background font-mono text-xs"
+                                                disabled={appState.settings.runtimeMode === "remote"}
+                                                class="h-9 bg-background font-mono text-xs disabled:opacity-50"
                                             />
                                             <Button
                                                 variant="outline"
                                                 size="sm"
                                                 class="h-9 shrink-0"
+                                                disabled={appState.settings.runtimeMode === "remote"}
                                             >
                                                 Browse
                                             </Button>
                                         </div>
-                                        <p
-                                            class="text-[11px] text-muted-foreground leading-snug"
-                                        >
-                                            Where OpenArc Studio will download
-                                            and store models.
-                                        </p>
+                                        {#if appState.settings.runtimeMode === "local"}
+                                            <p
+                                                class="text-[11px] text-muted-foreground leading-snug"
+                                            >
+                                                Where OpenArc Studio will download
+                                                and store models.
+                                            </p>
+                                        {:else}
+                                            <p
+                                                class="text-[11px] text-amber-600 dark:text-amber-400 leading-snug"
+                                            >
+                                                Only Available for Local Instances
+                                            </p>
+                                        {/if}
                                     </div>
 
                                     <div
