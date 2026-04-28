@@ -9,6 +9,7 @@
     import * as Dialog from "$lib/components/ui/dialog";
     import { appState } from "$lib/state.svelte.js";
     import { chatStore, DEFAULT_SETTINGS } from "$lib/chat.svelte.js";
+    import { markdownLinks } from '$lib/actions/markdownLinks';
     import { onMount } from "svelte";
     import {
         Send,
@@ -995,6 +996,7 @@
                                                     class="p-4 rounded-lg bg-muted/50 chat-markdown"
                                                     role="presentation"
                                                     onclick={handleBubbleClick}
+                                                    use:markdownLinks
                                                 >
                                                     {#each renderMarkdownSegments(displayText, `a-${msg.createdAt}-${msgIdx}`) as seg (seg.id)}
                                                         {@html seg.html}

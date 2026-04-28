@@ -10,6 +10,7 @@
     import ModelDownloaderModal from "$lib/components/layout/ModelDownloaderModal.svelte";
     import SettingsModal from "$lib/components/layout/SettingsModal.svelte";
     import Onboarding from "$lib/components/layout/Onboarding.svelte";
+    import LinkConfirmDialog from "$lib/components/layout/LinkConfirmDialog.svelte";
     import { appState } from "$lib/state.svelte.js";
     import { openarc } from "$lib/client.svelte.js";
     import { chatStore } from "$lib/chat.svelte.js";
@@ -60,4 +61,5 @@
 {#if isInitialized && appState.hasCompletedSetup}
     <ModelDownloaderModal />
     <SettingsModal />
+    <LinkConfirmDialog />
 {/if}

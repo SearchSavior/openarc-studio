@@ -31,6 +31,10 @@ export const appState = $state({
   rightPanelOpen: true,
   hasCompletedSetup: false,
 
+  linkConfirmOpen: false,
+  linkConfirmUrl: "",
+  linkConfirmResolve: null as ((value: boolean) => void) | null,
+
   activeLlmModel: null as string | null,
   activeSttModel: null as string | null,
   activeTtsModel: null as string | null,
@@ -54,6 +58,17 @@ export const appState = $state({
 
   clearLogs() {
     this.logs = [];
+  },
+
+  confirmLink(url: string): Promise<boolean> {
+    return new Promise((resolve) => {
+      if (this.linkConfirmResolve) {
+        this.linkConfirmResolve(false);
+      }
+      this.linkConfirmUrl = url;
+      this.linkConfirmResolve = resolve;
+      this.linkConfirmOpen = true;
+    });
   },
 
   settings: {
