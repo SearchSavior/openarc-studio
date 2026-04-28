@@ -1036,15 +1036,17 @@
                         </div>
 
                         <div class="space-y-3">
-                            {#if offloadAnalysis}
-                                <VramOffloadBar analysis={offloadAnalysis} />
-                            {:else}
-                                <div
-                                    class="flex items-center gap-1.5 text-xs font-medium bg-muted/50 text-muted-foreground px-3 py-1.5 rounded-md border border-border/50 w-fit"
-                                >
-                                    <AlertCircle class="w-3.5 h-3.5" />
-                                    Offload analysis unavailable
-                                </div>
+                            {#if appState.settings.showVramEstimator}
+                                {#if offloadAnalysis}
+                                    <VramOffloadBar analysis={offloadAnalysis} />
+                                {:else}
+                                    <div
+                                        class="flex items-center gap-1.5 text-xs font-medium bg-muted/50 text-muted-foreground px-3 py-1.5 rounded-md border border-border/50 w-fit"
+                                    >
+                                        <AlertCircle class="w-3.5 h-3.5" />
+                                        Offload analysis unavailable
+                                    </div>
+                                {/if}
                             {/if}
 
                             <div class="flex flex-wrap items-center gap-1.5">

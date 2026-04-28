@@ -1128,14 +1128,15 @@
                                         Save configuration
                                     {/if}
                                 </Button>
-
-                                <!-- VRAM estimator -->
-                                <div class="pt-2 border-t border-border/50">
-                                    <VramEstimator
-                                        modelName={selectedModel.name}
-                                        modelMetadata={null}
-                                    />
-                                </div>
+                                {#if appState.settings.showVramEstimator}
+                                    <!-- VRAM estimator -->
+                                    <div class="pt-2 border-t border-border/50">
+                                        <VramEstimator
+                                            modelName={selectedModel.name}
+                                            modelMetadata={null}
+                                        />
+                                    </div>
+                                {/if}
                             </div>
                         </ScrollArea>
                     </div>

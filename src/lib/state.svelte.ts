@@ -9,6 +9,7 @@ export type AppSettings = {
   autoUpdate: boolean;
   compactMode: boolean;
   autoScroll: boolean;
+  showVramEstimator: boolean;
   defaultModelPath: string;
   curatedManifestUrl: string;
 };
@@ -63,6 +64,7 @@ export const appState = $state({
     autoUpdate: true,
     compactMode: false,
     autoScroll: true,
+    showVramEstimator: false,
     defaultModelPath: "~/.cache/openarc/models",
     curatedManifestUrl: "",
   } as AppSettings,
