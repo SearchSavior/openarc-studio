@@ -593,15 +593,19 @@
                         class="pl-9 h-9 bg-background"
                     />
                 </div>
-                <Button
-                    variant={viewMode === "curated" ? "default" : "outline"}
-                    size="sm"
-                    class="h-9 gap-1.5 shrink-0"
+                <button
+                    type="button"
+                    aria-pressed={viewMode === "curated"}
                     onclick={switchToCurated}
+                    class="inline-flex items-center gap-1.5 text-[11px] font-medium px-2.5 py-2.5 rounded-lg border transition-colors {viewMode === "curated"
+                        ? 'bg-transparent text-muted-foreground border-blue-500'
+                        : 'bg-transparent text-muted-foreground border-border hover:text-foreground hover:border-foreground/50'}"
                 >
-                    <Sparkles class="w-3.5 h-3.5" />
+                    <span
+                        class="w-2.5 h-2.5 rounded-full {viewMode === "curated"?"bg-blue-500":"bg-gray-500"}"
+                    ></span>
                     Curated
-                </Button>
+                </button>
             </div>
 
             {#if viewMode === "curated"}

@@ -1,7 +1,3 @@
-openarc/openarc-studio/src/lib/components/layout/settings/SettingsLogsPage.svelte
-```
-
-```svelte
 <script lang="ts">
 	import { Button } from "$lib/components/ui/button";
 	import { appState } from "$lib/state.svelte.js";

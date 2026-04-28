@@ -160,7 +160,7 @@
       },
       {
           path: "/openarc/downloader",
-          method: "DELETE",
+          method: "DEL",
           description: "Cancel an active download.",
           requestBody: [
               { name: "model_name", type: "string", required: true, description: "Hugging Face repo ID" }
@@ -605,10 +605,9 @@
       {/if}
     </div>
   </main>
-
+<!--
   {#if appState.rightPanelOpen}
     <aside class="w-[320px] shrink-0 border-l bg-background flex flex-col h-full overflow-hidden">
-      <!-- Sidebar header -->
       <div class="shrink-0 px-5 pt-4 pb-4 border-b bg-gradient-to-b from-muted/20 to-transparent">
         <div class="flex items-center gap-2.5 mb-1">
           <div class="w-8 h-8 rounded-lg bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0">
@@ -652,4 +651,5 @@
       </ScrollArea>
     </aside>
   {/if}
+  -->
 </div>
