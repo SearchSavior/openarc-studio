@@ -427,6 +427,21 @@
                     "Fetched HuggingFace metadata",
                     `params=${meta.parameterSize} quant=${meta.quantization} ctx=${meta.maxContextTokens}`,
                 );
+
+                if (hfMetadata.quantization === "FP16") {
+                    const nameLower = model.id.toLowerCase();
+                    if (nameLower.includes("int4") || nameLower.includes("quant4")) {
+                        hfMetadata.quantization = "INT4";
+                        hfMetadata.quantSource = "name";
+                    } else if (nameLower.includes("int8") ||nameLower.includes("quant8")) {
+                        hfMetadata.quantization = "INT8";
+                        hfMetadata.quantSource = "name";
+                    }
+                    else if ( nameLower.includes("fp16") || nameLower.includes("half")) {
+                      hfMetadata.quantSource = "name";
+                    }
+                }
+
             } catch (e: any) {
                 appState.addLog(
                     "warn",
